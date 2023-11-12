@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  nginx:
+    container_name: arsy_nginx
+    build: ./nginx/
+    restart: always
+    volumes:
+      - uwsgi_data:/tmp/uwsgi/
+      - web_static:/var/www/arsy/static/:ro
+      - media_data:/var/www/arsy/media/
+    ports:
+      - "8888:80"
+    depends_on:
+      - django
+    networks:
+      - arsy
+
+  django:
+    container_name: arsy_backend
+    build: ./web/
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - .:/django_arsy/
+      - uwsgi_data:/tmp/uwsgi/
+      - web_static:/static/
+      - media_data:/media/
+
+    depends_on:
+      - postgres-db
+    networks:
+      - arsy
+
+  postgres-db:
+    container_name: arsy_postgres
+    ports:
+      - "5432:5432"
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    networks:
+      - arsy
+
+volumes:
+  uwsgi_data:
+  web_static:
+  media_data:
+  postgres-data:
+
+networks:
+  arsy:
+    driver: bridge
