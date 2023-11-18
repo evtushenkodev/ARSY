@@ -18,4 +18,6 @@ if not User.objects.filter(email='$DJANGO_SUPERUSER_EMAIL').exists():
         '$DJANGO_SUPERUSER_PASSWORD',
     )" | python3 manage.py shell
 
+blender --background --python /web/fileconverter/install_addon.py
+
 uwsgi --ini /web/arsy.uwsgi.ini
